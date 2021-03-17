@@ -8,19 +8,26 @@ import './style.css';
 
 // const listItem = [
 //     {
-//         title: "Viết code"
-//     },
-//     {
-//         title: "Học tiếng anh"
-//     }
-// ]
-
-function ToDoList() {
-    //Tạo State
-    const [isShowModal, setIsShowModal] = useState(false); //State show/hite modal button thêm
-    const [isShowDeleteModal, setIsShowDeleteModal] = useState(null); //State show/hite modal button xóa
-    const [isShowEditModal, setIsShowEditModal] = useState(false); //State show/hite modal button sửa
-    const [newShowEditModal, setNewShowEditModal] = useState({});   //State "tạm" để chứa dữ liệu phục vụ hàm sửa
+    //         title: "Viết code"
+    //     },
+    //     {
+        //         title: "Học tiếng anh"
+        //     }
+        // ]
+        
+        function ToDoList() {
+            //Tạo State
+            const [toDoList, setToDoList] = useState([]); // Tạo useState để thêm các phần tử vào
+            const [isShowModal, setIsShowModal] = useState(false); //State show/hite modal button thêm
+            const [isShowDeleteModal, setIsShowDeleteModal] = useState(null); //State show/hite modal button xóa
+            const [isShowEditModal, setIsShowEditModal] = useState(false); //State show/hite modal button sửa
+            const [newShowEditModal, setNewShowEditModal] = useState({});   //State "tạm" để chứa dữ liệu phục vụ hàm sửa
+            const [valueSearch, setValueSearch] = useState(''); //State lưu values của ô input search
+            const [isShowMore, setIsShowMore] = useState(false); //State để Show More Item
+            
+    const newToDoListData = toDoList.filter( (item, index) => {
+        return (item.title.toLowerCase()).indexOf(valueSearch.toLowerCase()) !== -1;
+    })
 
     const handleShow = () => {
         setIsShowModal(true);
@@ -66,7 +73,7 @@ function ToDoList() {
         setNewShowEditModal({});
     }
 
-    //values này là giá trị của ô. 
+    //values này là giá trị của ô. !!!!!!!!!!
     const handleEdit = (values, index) => {
     console.log("Log: -> handleEdit -> values", values)
         const newToDoList = toDoList;
@@ -77,8 +84,6 @@ function ToDoList() {
         setIsShowEditModal(false);
     }
 
-    // Tạo useState để thêm các phần tử vào
-    const [toDoList, setToDoList] = useState([]);
     //Thêm phần tử vào đầu 
     const renderToDoList = (values) => {
         setToDoList([
@@ -90,11 +95,23 @@ function ToDoList() {
         setIsShowModal(false);
     };
 
+    // Viết hàm search. Lấy values thông qua onChang()
+    const handleSearch = (e) => {
+        const {value} = e.target;
+        setValueSearch(value);
+    }
+
+
     //Hàm render ra các item thông qua useState
     const renderListGroupItem = () => {
-        return toDoList.map( (item, itemIndex) => {
+        return newToDoListData.map( (item, itemIndex) => {
+            if(!isShowMore && itemIndex > 4) //đúng điều kiện thì ẩn item trước đó. Sau ở hàm onClick button sửa isShowMore=true => sai điều kiện => hiển thị item
+                return null;
             return(
-                <ListGroup.Item key={itemIndex} className="todo-list__listgroup--item">
+                <ListGroup.Item 
+                    key={itemIndex} 
+                    className="todo-list__listgroup--item"
+                >
                 <p>{item.title}</p>
                 <div className="todo-list__wrapper">
                     <Button 
@@ -121,13 +138,36 @@ function ToDoList() {
     <>
         <div className="todo-list__container">
             <div className="todo-list__content">
+                <h3 className="todo-list__title">To Do List</h3>
                 <div className="todo-list__title">
-                    <h3>To Do List</h3>
-                    <Button variant="primary" onClick={() => handleShow()}>Thêm công việc</Button>
+                    <input 
+                        type="text" 
+                        className="form-control todo-list__search" 
+                        placeholder="Tìm kiếm ..."
+                        onChange={(e) => handleSearch(e)}
+                    />
+                    <Button 
+                        variant="primary" 
+                        onClick={() => handleShow()}
+                    >
+                        Thêm công việc
+                    </Button>
                 </div>
                 <ListGroup className="mt-2 todo-list__listgroup">
                     {renderListGroupItem()}
-                </ListGroup>
+                    {/* isShowMore=flase => !isShowMore=true. và length>5 thì hiển thị button  */}
+                    {(!isShowMore && newToDoListData.length > 5) && (
+                        <div className="d-flex justify-content-center mt-2">
+                            <button 
+                                variant="outline-secondary" 
+                                className="rounded-pill"
+                                onClick={() => setIsShowMore(true)} //isShowMore=true. => điều kiện !isShowMore=flase => sai => ẩn đi
+                            >
+                                Hiển thị thêm
+                            </button>   
+                        </div>
+                    )}
+                </ListGroup> 
             </div>
         </div>
         <Modal show={isShowModal} onHide={handleClose}>
@@ -185,6 +225,7 @@ function ToDoList() {
             handleCloseDelete={handleCloseDelete} 
             handleDelete={handleDelete}
         />
+
         <ButtonEdit 
             isShowEditModal={isShowEditModal} 
             handleCloseEdit={handleCloseEdit} 

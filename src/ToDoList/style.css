@@ -28,3 +28,7 @@ p{
     padding: 0 !important;
 }
 
+.todo-list__search{
+    width: 300px !important;
+}
+
